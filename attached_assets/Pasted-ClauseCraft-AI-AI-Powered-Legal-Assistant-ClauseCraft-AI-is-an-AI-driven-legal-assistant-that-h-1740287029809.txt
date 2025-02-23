@@ -1,0 +1,105 @@
+ClauseCraft AI – AI-Powered Legal Assistant 🚀
+ClauseCraft AI is an AI-driven legal assistant that helps users analyze contracts, detect risks, highlight clauses, and generate agreements using fully open-source AI models. It also includes an AI-powered legal chatbot to answer legal queries.
+
+🔹 Features – Everything Works Together!
+✅ AI Contract Analysis – Upload PDFs/Text & get AI-generated legal insights.
+✅ Risk Detection & Redlining – AI highlights risky clauses (termination, penalties, liability).
+✅ AI Contract Generator – Generate NDAs, Freelancer Agreements, & more.
+✅ Legal AI Chatbot – Get AI-powered answers to legal queries.
+✅ Secure Storage & Version Control – Store & manage contracts with Supabase (PostgreSQL).
+
+🔹 Every feature runs on open-source AI models (Mistral/Gemma) – no closed-source dependencies!
+
+1️⃣ How It Works – Everything Together
+📌 AI Contract Analysis (PDF & Text Input) + Risk Detection
+1️⃣ User uploads a contract (PDF/Text).
+2️⃣ AI extracts text using PDFPlumber + Tesseract OCR.
+3️⃣ AI analyzes the contract and summarizes key points.
+4️⃣ AI highlights risky clauses (e.g., penalties, liabilities, termination risks).
+5️⃣ AI suggests modifications with reasoning.
+
+💡 Implementation:
+
+Text Extraction: PDFPlumber, PyMuPDF, Tesseract OCR
+AI Processing: Mistral/Gemma model (Open-Source LLM)
+Risk Detection: AI scans for key legal terms & assigns a risk level
+📌 AI Contract Generator
+1️⃣ User selects a contract type (NDA, Freelancer Agreement, Lease Agreement, etc.).
+2️⃣ AI asks for party names, contract duration, and payment terms.
+3️⃣ AI generates a legally structured document in Markdown/PDF format.
+4️⃣ Users can edit & download the contract.
+
+💡 Implementation:
+
+Form-Based Input: React form to collect user details
+AI Model: Mistral/Gemma for contract text generation
+Output Format: Markdown → PDF conversion for structured legal documents
+📌 Legal AI Chatbot (Always On)
+1️⃣ Users ask legal questions about contracts, clauses, and obligations.
+2️⃣ AI fetches context-aware answers based on legal knowledge.
+3️⃣ The chatbot can explain clauses, suggest modifications, and answer FAQs.
+
+💡 Implementation:
+
+AI Model: Mistral/Gemma (FOSS-compliant)
+WebSocket-based real-time chat for instant responses
+📌 Secure Storage & Version Control
+1️⃣ Contracts are stored securely in Supabase (PostgreSQL).
+2️⃣ Each contract version is timestamped for tracking.
+3️⃣ Users can view & retrieve past versions anytime.
+
+💡 Implementation:
+
+DB: Supabase (PostgreSQL) for contract storage
+Version Control: Automatically saves contract history
+2️⃣ Tech Stack – Open-Source & Efficient
+✅ Frontend (React + TypeScript)
+
+Framework: React.js
+Styling: TailwindCSS
+PDF Handling: React-PDF
+API Calls: Axios
+✅ Backend (FastAPI + Python)
+
+Framework: FastAPI
+AI Models: Mistral/Gemma (Open-Source LLMs)
+Text Extraction: PDFPlumber, PyMuPDF, Tesseract OCR
+Task Queue: Celery + Redis (for async processing)
+✅ Database & Storage
+
+DB: Supabase (PostgreSQL)
+File Storage: MinIO / AWS S3
+✅ Authentication & Security
+
+Auth Provider: Clerk/Auth.js
+Token Management: JWT
+Encryption: AES for contract security
+3️⃣ How to Get Started – Everything at Once
+bash
+Copy
+Edit
+git clone https://github.com/mdayan8/ClauseCraft-AI.git
+cd ClauseCraft-AI
+Run Backend:
+
+bash
+Copy
+Edit
+uvicorn main:app --reload
+Run Frontend:
+
+bash
+Copy
+Edit
+npm install
+npm run dev
+🔹 Everything works together – contract analysis, generation, risk detection, chatbot!
+
+4️⃣ Summary – No Extra Complexity, Just Works!
+🔹 Contract Analysis & Risk Detection – AI extracts text, summarizes, and flags risks.
+🔹 Contract Generator – AI creates NDAs, Freelancer Agreements, etc.
+🔹 Legal Chatbot – AI answers contract-related legal questions.
+🔹 Secure Storage & Versioning – All contracts are saved & retrievable.
+
+⚡ Everything is built using Open-Source AI Models (Mistral/Gemma). No closed-source dependencies.
+
