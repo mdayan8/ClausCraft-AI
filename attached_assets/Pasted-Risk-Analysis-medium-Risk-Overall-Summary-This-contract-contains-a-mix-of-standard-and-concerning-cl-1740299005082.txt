@@ -1,0 +1,60 @@
+Risk Analysis
+medium Risk
+Overall Summary
+This contract contains a mix of standard and concerning clauses. The primary concerns involve the lack of a Statement of Work attachment and the automatic renewal clause. Addressing these issues will significantly improve the fairness and enforceability of the agreement.
+
+Scope of Services
+high Risk
+Service Provider agrees to provide consulting, maintenance, and technical support services as detailed in the attached Statement of Work.
+
+Risk Analysis: The Statement of Work is not attached. This clause is therefore incomplete and unenforceable.
+
+Suggestion: Attach the Statement of Work to this agreement and clearly reference it in this clause.
+
+Payment Terms
+low Risk
+The Client agrees to pay the Service Provider a monthly fee of $5000 for services rendered, payable within 15 days of receiving the invoice.
+
+Risk Analysis: There is no consequence specified for late payments.
+
+Suggestion: Add a late fee or interest clause to incentivize timely payments.
+
+Confidentiality
+low Risk
+Both parties agree to maintain the confidentiality of all proprietary information disclosed during the duration of this Agreement.
+
+Risk Analysis: This clause is standard and adequate.
+
+Suggestion: None.
+
+Renewal and Adjustment
+medium Risk
+This Agreement will remain effective for one year from the date of signing. In the absence of written termination notice provided at least 90 days prior to the end of the term, the Agreement will automatically renew for an additional five-year period.
+
+Risk Analysis: The automatic renewal clause may not be fair to the Client, as it could unintentionally bind them to the agreement for a long period without proper notice.
+
+Suggestion: Consider modifying the automatic renewal clause to require annual renewals, or provide a mechanism for the Client to easily opt out of renewals.
+
+Service Management
+low Risk
+In addition to the service fees, the Client agrees to cover reasonable administrative and account management costs, which may be billed quarterly.
+
+Risk Analysis: This clause is standard and adequate.
+
+Suggestion: None.
+
+Termination
+low Risk
+Either party may terminate this Agreement with 60 days written notice. Fees paid in advance are non-refundable.
+
+Risk Analysis: This clause is standard and adequate.
+
+Suggestion: None.
+
+Governing Law
+low Risk
+This Agreement is governed by the laws of the State of XYZ.
+
+Risk Analysis: This clause is standard and adequate.
+
+Suggestion: None.
