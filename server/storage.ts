@@ -1,6 +1,7 @@
 import { users, type User, type InsertUser, type ChatMessage, type Contract } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { analyzeContract as aiAnalyzeContract, generateContract as aiGenerateContract, getLegalResponse } from "./services/ai";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -9,15 +10,15 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Contract methods
   analyzeContract(content: string): Promise<any>;
   generateContract(data: any): Promise<Contract>;
-  
+
   // Chat methods
   getChatHistory(userId: number): Promise<ChatMessage[]>;
   createChatMessage(data: { userId: number; message: string }): Promise<ChatMessage>;
-  
+
   // Session store
   sessionStore: session.Store;
 }
@@ -43,7 +44,7 @@ export class MemStorage implements IStorage {
     this.currentContractId = 1;
   }
 
-  // Auth methods
+  // Auth methods remain unchanged
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
@@ -61,35 +62,43 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  // Contract methods
+  // Contract methods updated to use AI service
   async analyzeContract(content: string) {
-    // Simulated AI analysis
-    return {
-      summary: "Contract analysis summary would go here",
-      risks: [
-        { type: "high", description: "Identified risk 1" },
-        { type: "medium", description: "Identified risk 2" }
-      ],
-      recommendations: ["Recommendation 1", "Recommendation 2"]
-    };
+    try {
+      return await aiAnalyzeContract(content);
+    } catch (error) {
+      console.error('Error in analyzeContract:', error);
+      throw error;
+    }
   }
 
   async generateContract(data: any): Promise<Contract> {
-    const id = this.currentContractId++;
-    const contract = {
-      id,
-      userId: data.userId,
-      title: data.type,
-      content: `Generated contract content for ${data.type}`,
-      analysis: null,
-      version: 1,
-      createdAt: new Date(),
-    };
-    this.contracts.set(id, contract);
-    return contract;
+    try {
+      const generated = await aiGenerateContract(data.type, {
+        partyA: data.partyA,
+        partyB: data.partyB,
+        terms: data.terms
+      });
+
+      const id = this.currentContractId++;
+      const contract = {
+        id,
+        userId: data.userId,
+        title: data.type,
+        content: generated.content,
+        analysis: null,
+        version: 1,
+        createdAt: new Date(),
+      };
+      this.contracts.set(id, contract);
+      return contract;
+    } catch (error) {
+      console.error('Error in generateContract:', error);
+      throw error;
+    }
   }
 
-  // Chat methods
+  // Chat methods updated to use AI service
   async getChatHistory(userId: number): Promise<ChatMessage[]> {
     return Array.from(this.chatMessages.values())
       .filter(msg => msg.userId === userId)
@@ -97,16 +106,22 @@ export class MemStorage implements IStorage {
   }
 
   async createChatMessage(data: { userId: number; message: string }): Promise<ChatMessage> {
-    const id = this.currentChatId++;
-    const message: ChatMessage = {
-      id,
-      userId: data.userId,
-      message: data.message,
-      response: "AI Assistant: This is a simulated response to your legal question.",
-      createdAt: new Date(),
-    };
-    this.chatMessages.set(id, message);
-    return message;
+    try {
+      const response = await getLegalResponse(data.message);
+      const id = this.currentChatId++;
+      const message: ChatMessage = {
+        id,
+        userId: data.userId,
+        message: data.message,
+        response,
+        createdAt: new Date(),
+      };
+      this.chatMessages.set(id, message);
+      return message;
+    } catch (error) {
+      console.error('Error in createChatMessage:', error);
+      throw error;
+    }
   }
 }
 
