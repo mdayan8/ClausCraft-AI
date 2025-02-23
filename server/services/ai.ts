@@ -116,7 +116,7 @@ Provide a thorough analysis in this EXACT JSON format (no other text):
 }
 
 export async function generateContract(type: string, params: any) {
-  const prompt = `You are a legal expert. Generate a professional ${type} contract with these details:
+  const prompt = `You are a legal expert. Generate a professional ${type} contract with these details:`;
 - Party A (First Party): ${params.partyA}
 - Party B (Second Party): ${params.partyB}
 - Additional Terms: ${params.terms || 'Standard terms apply'}
