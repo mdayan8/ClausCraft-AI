@@ -3,6 +3,7 @@ import { useDropzone } from 'react-dropzone';
 import * as pdfjsLib from 'pdfjs-dist';
 import { Card } from "@/components/ui/card";
 import { FileUp, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileUploaderProps {
   onTextExtracted: (text: string) => void;
@@ -10,17 +11,24 @@ interface FileUploaderProps {
 }
 
 export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) {
+  const { toast } = useToast();
+
   const extractTextFromPDF = async (file: File) => {
+    toast({
+      title: "Processing PDF",
+      description: "Extracting text from your document...",
+    });
+
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     let text = '';
-    
+
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
       text += content.items.map((item: any) => item.str).join(' ') + '\n';
     }
-    
+
     return text;
   };
 
@@ -36,10 +44,19 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
         text = await file.text();
       }
       onTextExtracted(text);
+      toast({
+        title: "File Uploaded",
+        description: "Your document has been processed successfully.",
+      });
     } catch (error) {
       console.error('Error processing file:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process your document. Please try again.",
+        variant: "destructive"
+      });
     }
-  }, [onTextExtracted]);
+  }, [onTextExtracted, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -47,7 +64,8 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
       'application/pdf': ['.pdf'],
       'text/plain': ['.txt']
     },
-    maxFiles: 1
+    maxFiles: 1,
+    disabled: isLoading
   });
 
   return (
@@ -60,20 +78,25 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
       <input {...getInputProps()} disabled={isLoading} />
       <div className="flex flex-col items-center justify-center text-center space-y-4">
         {isLoading ? (
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <>
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <p className="text-sm font-medium">Processing your document...</p>
+          </>
         ) : (
-          <FileUp className="h-10 w-10 text-primary" />
+          <>
+            <FileUp className="h-10 w-10 text-primary" />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">
+                {isDragActive 
+                  ? "Drop the file here"
+                  : "Drag & drop contract file here, or click to select"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Supports PDF and TXT files
+              </p>
+            </div>
+          </>
         )}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">
-            {isDragActive 
-              ? "Drop the file here"
-              : "Drag & drop contract file here, or click to select"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Supports PDF and TXT files
-          </p>
-        </div>
       </div>
     </Card>
   );

@@ -52,7 +52,7 @@ export async function generateContract(type: string, params: any) {
   const prompt = `You are a legal expert generating a ${type} contract. Please create a contract using these parameters:
 ${JSON.stringify(params, null, 2)}
 
-Generate a well-structured, legally-sound contract in markdown format. Include all necessary clauses and ensure it reflects standard legal practices.`;
+Generate a well-structured, legally-sound contract in markdown format. Include all necessary clauses and ensure it reflects standard legal practices. Return the response in JSON format with a content field containing the contract text.`;
 
   try {
     const response = await hf.textGeneration({
@@ -65,8 +65,9 @@ Generate a well-structured, legally-sound contract in markdown format. Include a
       },
     });
 
+    const result = JSON.parse(response.generated_text);
     return {
-      content: response.generated_text,
+      content: result.content,
       format: 'markdown'
     };
   } catch (error) {
