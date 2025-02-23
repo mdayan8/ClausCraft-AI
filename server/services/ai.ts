@@ -8,7 +8,16 @@ export async function analyzeContract(content: string) {
     throw new Error("Contract is too long. Please reduce the text length and try again.");
   }
 
-  const prompt = `You are an experienced legal analyst. Carefully analyze this contract and provide a detailed analysis. Pay special attention to potentially risky clauses, unclear terms, and legal implications.
+  const prompt = `You are an experienced legal analyst. Analyze this contract and provide a detailed professional analysis focusing on:
+1. Overall risk assessment
+2. Potentially problematic clauses
+3. Legal implications
+4. Specific recommendations
+
+Contract to analyze:
+${content}
+
+Provide analysis in this JSON format:
 
 Contract to analyze:
 ${content}
@@ -95,12 +104,20 @@ Provide a thorough analysis in this EXACT JSON format (no other text):
 }
 
 export async function generateContract(type: string, params: any) {
-  const prompt = `You are a legal expert generating a ${type} contract. Create a professional contract with these parameters:
-${JSON.stringify(params, null, 2)}
+  const prompt = `You are a legal expert. Generate a professional ${type} contract with these details:
+- Party A (First Party): ${params.partyA}
+- Party B (Second Party): ${params.partyB}
+- Additional Terms: ${params.terms || 'Standard terms apply'}
 
-Return ONLY a JSON response in this format (no other text):
+Create a properly formatted contract following these rules:
+1. Include all necessary legal clauses
+2. Add proper signature blocks
+3. Use clear, enforceable language
+4. Add standard protections for both parties
+
+Return ONLY valid JSON in this format:
 {
-  "content": "The complete contract text with proper formatting"
+  "content": "THE_CONTRACT_TEXT"
 }`;
 
   try {
