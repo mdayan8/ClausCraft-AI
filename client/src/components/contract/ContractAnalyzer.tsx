@@ -17,6 +17,7 @@ type Risk = {
 
 type Analysis = {
   summary: string;
+  overall_risk: 'high' | 'medium' | 'low';
   risks: Risk[];
   recommendations: string[];
 };
@@ -84,6 +85,11 @@ export function ContractAnalyzer() {
     analysisMutation.mutate(contractText);
   };
 
+  const handleFileUploaded = (text: string) => {
+    setContractText(text);
+    handleAnalyze();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -109,7 +115,7 @@ export function ContractAnalyzer() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
           <FileUploader 
-            onTextExtracted={setContractText}
+            onTextExtracted={handleFileUploaded}
             isLoading={analysisMutation.isPending}
           />
 
@@ -132,7 +138,10 @@ export function ContractAnalyzer() {
             <>
               <Card>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Summary</h3>
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="font-semibold">Overall Analysis</h3>
+                    <RiskBadge type={analysisMutation.data.overall_risk} />
+                  </div>
                   <p className="text-sm text-muted-foreground">
                     {analysisMutation.data.summary}
                   </p>
@@ -150,7 +159,7 @@ export function ContractAnalyzer() {
                           <span className="text-xs text-muted-foreground capitalize">{risk.category}</span>
                         </div>
                         <div className="space-y-2">
-                          <div className="text-sm font-medium">
+                          <div className="text-sm">
                             <h4 className="font-semibold mb-1">Clause:</h4>
                             <p className="whitespace-pre-wrap">{risk.clause}</p>
                           </div>

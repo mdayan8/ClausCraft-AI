@@ -19,7 +19,7 @@ ${content}
 
 Please format your response as a strict JSON object with this structure:
 {
-  "summary": "Brief overview of the contract",
+  "summary": "Brief overview of the contract and overall assessment",
   "overall_risk": "high|medium|low",
   "risks": [
     {
@@ -46,7 +46,8 @@ Please format your response as a strict JSON object with this structure:
 
     // Ensure we get valid JSON
     try {
-      return JSON.parse(response.generated_text);
+      const result = JSON.parse(response.generated_text);
+      return result;
     } catch (e) {
       console.error('Failed to parse AI response:', response.generated_text);
       throw new Error('Failed to analyze contract - invalid response format');
