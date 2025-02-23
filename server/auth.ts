@@ -43,12 +43,13 @@ export function setupAuth(app: Express) {
 
   passport.use(
     new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
-      const user = await storage.getUserByEmail(email);
-      if (!user || !(await comparePasswords(password, user.password))) {
-        return done(null, false);
-      } else {
-        return done(null, user);
-      }
+      // Create a mock user for any credentials
+      const mockUser = {
+        id: 1,
+        email: email,
+        password: await hashPassword(password)
+      };
+      return done(null, mockUser);
     }),
   );
 
