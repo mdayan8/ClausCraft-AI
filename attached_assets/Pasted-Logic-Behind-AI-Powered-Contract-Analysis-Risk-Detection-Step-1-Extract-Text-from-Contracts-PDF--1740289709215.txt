@@ -1,0 +1,53 @@
+Logic Behind AI-Powered Contract Analysis & Risk Detection
+Step 1: Extract Text from Contracts (PDF/Text Processing)
+Tools Used: PDFPlumber, PyMuPDF, Tesseract OCR
+Logic:
+If the document is a searchable PDF, extract text directly using PyMuPDF or PDFPlumber.
+If the document is scanned (image-based PDF), use Tesseract OCR to convert the image into readable text.
+Preprocessing: Remove extra whitespaces, line breaks, and special characters to clean the text for analysis.
+Step 2: Process Text Using Open-Source LLM (Mistral/Gemma)
+Logic:
+Pass the cleaned text to an NLP pipeline using Mistral/Gemma (Hugging Face).
+Use a legal-specific prompt to detect and classify clauses.
+Apply Named Entity Recognition (NER) to detect contract-related terms such as "termination," "indemnity," or "confidentiality."
+Break down the document into sections for clause-based analysis.
+Step 3: Clause Risk Classification & Highlighting
+Logic:
+Predefined risk categories:
+Termination Risks: Look for words like "immediate termination," "without notice," "unilateral termination."
+Indemnity & Liability Issues: Identify phrases like "hold harmless," "indemnify," "unlimited liability."
+Confidentiality Concerns: Detect terms like "perpetual confidentiality," "unauthorized disclosure penalties."
+Unfair Penalties: Spot clauses mentioning "excessive late fees," "unjustifiable fines," or "forfeiture of rights."
+The AI assigns a risk score to each clause based on severity.
+Step 4: Justifications & Suggested Modifications
+Logic:
+For high-risk clauses, AI generates an explanation based on legal best practices.
+AI suggests modifications to ensure fairness (e.g., "Replace ‘unilateral termination’ with ‘termination with mutual notice’").
+Output structured risk highlights, displaying clauses in red (high risk), yellow (moderate risk), and green (safe).
+Logic Behind AI-Powered Contract Generator
+Step 1: User Selects Contract Type
+Logic:
+The user chooses a contract type (NDA, Freelancer Agreement, Lease Agreement, etc.).
+The backend loads a template structure based on the selected type.
+Step 2: AI Asks for Key Details
+Logic:
+AI dynamically generates a form asking for required fields (e.g., "Party Name", "Payment Terms", "Confidentiality Period").
+The system ensures required fields are legally valid (e.g., a contract must have a "Governing Law" section).
+Step 3: AI Generates Contract Using Predefined Template
+Logic:
+The AI fills in the legal template with user-provided details.
+Uses Mistral/Gemma for context-aware clause completion to ensure grammatical correctness and legal coherence.
+AI reviews the generated contract for redundancies or missing sections.
+Step 4: User Can Edit & Download Contract
+Logic:
+The generated contract is formatted in Markdown (for easy styling).
+The user can edit clauses before finalizing the document.
+The contract is converted into a PDF using WeasyPrint or ReportLab.
+Final Implementation Summary
+✅ Contract Analysis:
+
+Extract text → Use Mistral/Gemma for clause detection → Classify & highlight risky clauses → Provide AI-driven suggestions
+✅ Contract Generator:
+
+User selects contract type → AI collects details → Fill structured template → Allow edits & export to PDF
+💡 All components must work together seamlessly using Open-Source AI (Mistral/Gemma) from Hugging Face.

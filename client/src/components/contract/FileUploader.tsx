@@ -19,17 +19,27 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
       description: "Extracting text from your document...",
     });
 
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let text = '';
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let text = '';
 
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      text += content.items.map((item: any) => item.str).join(' ') + '\n';
+      toast({
+        title: "Processing PDF",
+        description: `Extracting text from ${pdf.numPages} pages...`,
+      });
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map((item: any) => item.str).join(' ') + '\n';
+      }
+
+      return text;
+    } catch (error) {
+      console.error('Error extracting PDF text:', error);
+      throw new Error('Failed to extract text from PDF');
     }
-
-    return text;
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -37,22 +47,36 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
     if (!file) return;
 
     try {
+      toast({
+        title: "Processing Document",
+        description: "Starting document analysis...",
+      });
+
       let text = '';
       if (file.type === 'application/pdf') {
         text = await extractTextFromPDF(file);
+      } else if (file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        // For DOC/DOCX files, we'll read as text for now
+        text = await file.text();
       } else {
         text = await file.text();
       }
-      onTextExtracted(text);
+
+      if (!text.trim()) {
+        throw new Error('No text content found in the document');
+      }
+
       toast({
-        title: "File Uploaded",
-        description: "Your document has been processed successfully.",
+        title: "Document Processed",
+        description: "Successfully extracted text. Starting analysis...",
       });
+
+      onTextExtracted(text);
     } catch (error) {
       console.error('Error processing file:', error);
       toast({
         title: "Error",
-        description: "Failed to process your document. Please try again.",
+        description: error.message || "Failed to process your document. Please try again.",
         variant: "destructive"
       });
     }
@@ -62,6 +86,8 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
       'text/plain': ['.txt']
     },
     maxFiles: 1,
@@ -92,7 +118,7 @@ export function FileUploader({ onTextExtracted, isLoading }: FileUploaderProps) 
                   : "Drag & drop contract file here, or click to select"}
               </p>
               <p className="text-xs text-muted-foreground">
-                Supports PDF and TXT files
+                Supports PDF, DOC, DOCX and TXT files
               </p>
             </div>
           </>

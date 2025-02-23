@@ -3,21 +3,22 @@ import { HfInference } from '@huggingface/inference';
 const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 
 export async function analyzeContract(content: string) {
-  const prompt = `You are a legal expert analyzing a contract. Please analyze the following contract text and provide:
-1. An overall risk assessment (high/medium/low)
-2. A summary of key points
-3. Analysis of risky clauses, focusing on:
-   - Termination conditions
-   - Liability and indemnification
-   - Payment terms
-   - Confidentiality
-   - Unfair penalties
-4. Specific recommendations for improving each risky clause
+  const prompt = `You are a legal expert analyzing a contract. Analyze the following contract carefully and provide a detailed analysis following these steps:
+
+1. Overall Risk Assessment - Evaluate if the contract poses high, medium, or low risk
+2. Summary - Provide a brief overview of the contract and key findings
+3. Detailed Analysis - For each risky clause, analyze:
+   - Exact clause text
+   - Risk level (high/medium/low)
+   - Category (termination/liability/payment/confidentiality/penalties)
+   - Why it's risky
+   - How to improve it
+4. General Recommendations - List specific improvements for the contract
 
 Contract text:
 ${content}
 
-Please format your response as a strict JSON object with this structure:
+Format your response EXACTLY as this JSON structure:
 {
   "summary": "Brief overview of the contract and overall assessment",
   "overall_risk": "high|medium|low",
@@ -26,11 +27,13 @@ Please format your response as a strict JSON object with this structure:
       "type": "high|medium|low",
       "clause": "Exact clause text from contract",
       "category": "termination|liability|payment|confidentiality|penalties",
-      "explanation": "Why this is risky",
-      "recommendation": "How to improve it"
+      "explanation": "Detailed explanation of why this clause is risky",
+      "recommendation": "Specific suggestion for improving this clause"
     }
   ],
-  "recommendations": ["List of specific improvements"]
+  "recommendations": [
+    "List of specific improvements as action items"
+  ]
 }`;
 
   try {
@@ -44,9 +47,14 @@ Please format your response as a strict JSON object with this structure:
       },
     });
 
-    // Ensure we get valid JSON
     try {
       const result = JSON.parse(response.generated_text);
+
+      // Validate the response structure
+      if (!result.summary || !result.overall_risk || !Array.isArray(result.risks)) {
+        throw new Error('Invalid response format from AI');
+      }
+
       return result;
     } catch (e) {
       console.error('Failed to parse AI response:', response.generated_text);
