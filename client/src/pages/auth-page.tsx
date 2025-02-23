@@ -4,7 +4,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { useAuth } from "@/hooks/use-auth";
 
-export function AuthPage() {
+export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [location, setLocation] = useLocation();
   const { user } = useAuth();
