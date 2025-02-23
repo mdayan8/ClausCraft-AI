@@ -14,16 +14,13 @@ export default function AuthPage() {
   }, [user, setLocation]);
 
   useEffect(() => {
-    const registerUser = async () => {
-      if (!user && !registerMutation.isPending && !registerMutation.isSuccess) {
-        await registerMutation.mutateAsync({ 
-          email: "user@example.com", 
-          password: "password123" 
-        });
-      }
-    };
-    registerUser();
-  }, []);
+    if (!user && !registerMutation.isPending && !registerMutation.isSuccess && !registerMutation.isError) {
+      registerMutation.mutate({ 
+        email: "user@example.com", 
+        password: "password123" 
+      });
+    }
+  }, [user, registerMutation.isPending, registerMutation.isSuccess, registerMutation.isError]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
