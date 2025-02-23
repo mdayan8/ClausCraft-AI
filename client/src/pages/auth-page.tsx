@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
-import { LoginForm } from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 
 export default function AuthPage() {
   const [location, setLocation] = useLocation();
@@ -15,13 +14,16 @@ export default function AuthPage() {
   }, [user, setLocation]);
 
   useEffect(() => {
-    if (!user && !registerMutation.isPending && !registerMutation.isSuccess) {
-      registerMutation.mutate({ 
-        email: "user@example.com", 
-        password: "password123" 
-      });
-    }
-  }, [user, registerMutation.isPending, registerMutation.isSuccess]);
+    const registerUser = async () => {
+      if (!user && !registerMutation.isPending && !registerMutation.isSuccess) {
+        await registerMutation.mutateAsync({ 
+          email: "user@example.com", 
+          password: "password123" 
+        });
+      }
+    };
+    registerUser();
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
