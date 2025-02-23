@@ -75,6 +75,12 @@ export function ContractAnalyzer() {
       });
       return;
     }
+
+    toast({
+      title: "Analyzing Contract",
+      description: "Please wait while we analyze your contract...",
+    });
+
     analysisMutation.mutate(contractText);
   };
 
