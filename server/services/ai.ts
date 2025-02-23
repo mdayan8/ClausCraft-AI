@@ -3,36 +3,26 @@ import { HfInference } from '@huggingface/inference';
 const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 
 export async function analyzeContract(content: string) {
-  const prompt = `You are a legal expert analyzing a contract. Analyze the following contract carefully and provide a detailed analysis following these steps:
-
-1. Overall Risk Assessment - Evaluate if the contract poses high, medium, or low risk
-2. Summary - Provide a brief overview of the contract and key findings
-3. Detailed Analysis - For each risky clause, analyze:
-   - Exact clause text
-   - Risk level (high/medium/low)
-   - Category (termination/liability/payment/confidentiality/penalties)
-   - Why it's risky
-   - How to improve it
-4. General Recommendations - List specific improvements for the contract
+  const prompt = `You are a legal expert analyzing a contract. Analyze the following contract carefully and provide a detailed analysis.
 
 Contract text:
 ${content}
 
-Return ONLY a JSON response with EXACTLY this structure (without any additional text before or after):
+Provide your analysis in JSON format with this EXACT structure (do not include any other text):
 {
-  "summary": "Brief overview of the contract and overall assessment",
+  "summary": "Brief overview of findings",
   "overall_risk": "high|medium|low",
   "risks": [
     {
       "type": "high|medium|low",
-      "clause": "Exact clause text from contract",
+      "clause": "exact clause text",
       "category": "termination|liability|payment|confidentiality|penalties",
-      "explanation": "Detailed explanation of why this clause is risky",
-      "recommendation": "Specific suggestion for improving this clause"
+      "explanation": "why this clause is risky",
+      "recommendation": "how to improve it"
     }
   ],
   "recommendations": [
-    "List of specific improvements as action items"
+    "specific improvements"
   ]
 }`;
 
@@ -48,14 +38,22 @@ Return ONLY a JSON response with EXACTLY this structure (without any additional 
     });
 
     try {
-      // Clean the response text to ensure it only contains the JSON part
-      const jsonStr = response.generated_text.trim().replace(/```json|```/g, '');
-      const result = JSON.parse(jsonStr);
+      // Clean the response to ensure we only get JSON
+      let jsonStr = response.generated_text.trim();
+      // Remove any markdown code blocks if present
+      jsonStr = jsonStr.replace(/```json\n?|\n?```/g, '');
+      // Try to find JSON object if there's extra text
+      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response');
+      }
 
-      // Validate the response structure
+      const result = JSON.parse(jsonMatch[0]);
+
+      // Validate required fields
       if (!result.summary || !result.overall_risk || !Array.isArray(result.risks)) {
         console.error('Invalid AI response structure:', result);
-        throw new Error('Invalid response format from AI');
+        throw new Error('Invalid response format');
       }
 
       return result;
@@ -70,22 +68,12 @@ Return ONLY a JSON response with EXACTLY this structure (without any additional 
 }
 
 export async function generateContract(type: string, params: any) {
-  const prompt = `You are a legal expert generating a ${type} contract. Generate a clear, professional contract using these parameters:
+  const prompt = `You are a legal expert generating a ${type} contract. Create a professional contract with these parameters:
 ${JSON.stringify(params, null, 2)}
 
-Create a contract that includes:
-1. Title and introduction
-2. Definitions
-3. Scope of agreement
-4. Terms and conditions
-5. Payment terms (if applicable)
-6. Duration and termination
-7. Confidentiality
-8. Governing law
-
-Return ONLY a JSON response with this exact structure (no other text):
+Return ONLY a JSON response in this format (no other text):
 {
-  "content": "The complete contract text"
+  "content": "The complete contract text with proper formatting"
 }`;
 
   try {
@@ -100,21 +88,23 @@ Return ONLY a JSON response with this exact structure (no other text):
     });
 
     try {
-      // Clean the response text
-      const jsonStr = response.generated_text.trim().replace(/```json|```/g, '');
-      const result = JSON.parse(jsonStr);
+      // Clean and parse response
+      let jsonStr = response.generated_text.trim();
+      jsonStr = jsonStr.replace(/```json\n?|\n?```/g, '');
+      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No valid JSON found in response');
+      }
 
+      const result = JSON.parse(jsonMatch[0]);
       if (!result.content) {
         throw new Error('Invalid contract format');
       }
 
-      return {
-        content: result.content,
-        format: 'text'
-      };
+      return result;
     } catch (e) {
       console.error('Failed to parse AI response:', response.generated_text);
-      throw new Error('Failed to generate contract - invalid response format');
+      throw new Error('Failed to generate contract - invalid format');
     }
   } catch (error) {
     console.error('Error generating contract:', error);
@@ -123,15 +113,13 @@ Return ONLY a JSON response with this exact structure (no other text):
 }
 
 export async function getLegalResponse(question: string) {
-  const prompt = `You are a knowledgeable legal assistant. Please provide a clear, professional response to this legal question: "${question}"
+  const prompt = `You are a knowledgeable legal assistant. Provide a clear, professional response to this legal question: "${question}"
 
 Consider:
 1. Explain legal concepts in plain language
 2. Provide specific examples if helpful
-3. Mention any important caveats or considerations
-4. Suggest follow-up questions if more information is needed
-
-Format your response to be clear and easy to read, using proper paragraphs and bullet points where appropriate.`;
+3. Mention important caveats or considerations
+4. Suggest follow-up questions if needed`;
 
   try {
     const response = await hf.textGeneration({

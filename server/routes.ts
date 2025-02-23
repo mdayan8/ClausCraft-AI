@@ -11,24 +11,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/contracts/analyze", async (req, res) => {
     const { content } = req.body;
     if (!content) {
-      return res.status(400).send("Contract content is required");
+      return res.status(400).json({ error: "Contract content is required" });
     }
 
     try {
       const analysis = await storage.analyzeContract(content);
       res.json(analysis);
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      console.error('Analysis error:', error);
+      res.status(500).json({ 
+        error: (error as Error).message || "Failed to analyze contract" 
+      });
     }
   });
 
   // Contract Generation
   app.post("/api/contracts/generate", async (req, res) => {
+    const { type, partyA, partyB, terms } = req.body;
+
+    if (!type || !partyA || !partyB) {
+      return res.status(400).json({ 
+        error: "Contract type and party names are required" 
+      });
+    }
+
     try {
-      const contract = await storage.generateContract(req.body);
+      const contract = await storage.generateContract({
+        type,
+        partyA,
+        partyB,
+        terms: terms || '',
+        userId: req.user?.id
+      });
       res.json(contract);
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      console.error('Generation error:', error);
+      res.status(500).json({ 
+        error: (error as Error).message || "Failed to generate contract" 
+      });
     }
   });
 
@@ -42,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/chat/message", async (req, res) => {
     if (!req.user) return res.sendStatus(401);
     const parsedMessage = insertChatMessageSchema.safeParse(req.body);
-    
+
     if (!parsedMessage.success) {
       return res.status(400).json({ error: "Invalid message format" });
     }
@@ -54,7 +74,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       res.json(response);
     } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      console.error('Chat error:', error);
+      res.status(500).json({ 
+        error: (error as Error).message || "Failed to process message" 
+      });
     }
   });
 
