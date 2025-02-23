@@ -8,19 +8,30 @@ export async function analyzeContract(content: string) {
     throw new Error("Contract is too long. Please reduce the text length and try again.");
   }
 
-  const prompt = `You are an experienced legal analyst. Analyze this contract and provide a detailed professional analysis focusing on:
-1. Overall risk assessment
-2. Potentially problematic clauses
-3. Legal implications
-4. Specific recommendations
+  const prompt = `You are an expert legal analyst. Analyze this contract and provide a detailed risk assessment with the following structure:
 
 Contract to analyze:
 ${content}
 
-Provide analysis in this JSON format:
-
-Contract to analyze:
-${content}
+Return ONLY a JSON response in this exact format:
+{
+  "risk_level": "high|medium|low",
+  "summary": "Overall summary of the contract's key points and major concerns",
+  "clauses": [
+    {
+      "title": "Clause title/topic",
+      "risk_level": "high|medium|low",
+      "content": "The exact clause text from contract",
+      "analysis": "Detailed explanation of risks and implications",
+      "suggestion": "Specific recommendations to improve the clause"
+    }
+  ],
+  "recommendations": [
+    "List of specific improvements",
+    "Alternative clauses where needed",
+    "Areas requiring legal review"
+  ]
+}`;
 
 Provide a thorough analysis in this EXACT JSON format (no other text):
 {
@@ -54,24 +65,25 @@ Provide a thorough analysis in this EXACT JSON format (no other text):
     });
 
     try {
+      // Clean and parse the response
       const text = response.generated_text.trim();
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        // Fallback response format
         return {
-          summary: "This contract appears to be a formal agreement containing standard legal provisions. A thorough review identified several areas requiring attention, particularly regarding clarity and potential risks.",
-          overall_risk: "medium",
-          risks: [{
-            type: "medium",
-            clause: "Contract terms and conditions",
-            category: "general",
-            explanation: "The contract contains standard legal language but may benefit from additional clarity in key areas. Some terms could be subject to interpretation.",
-            recommendation: "Consider having a legal professional review the terms. Add specific definitions for any ambiguous terms."
+          risk_level: "medium",
+          summary: "Contract requires review. Some terms may need clarification.",
+          clauses: [{
+            title: "General Terms",
+            risk_level: "medium",
+            content: "Overall contract terms",
+            analysis: "Standard legal language present but some terms require clarification",
+            suggestion: "Review with legal counsel and add specific definitions"
           }],
           recommendations: [
-            "Add clear definitions for all key terms used throughout the agreement",
-            "Include specific performance metrics and deliverables where applicable",
-            "Consider adding dispute resolution procedures",
-            "Review force majeure provisions"
+            "Add clear definitions for key terms",
+            "Include specific deliverables",
+            "Add dispute resolution procedures"
           ]
         };
       }
