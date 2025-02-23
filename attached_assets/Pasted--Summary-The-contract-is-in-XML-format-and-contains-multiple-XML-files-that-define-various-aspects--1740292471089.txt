@@ -1,0 +1,47 @@
+
+Summary:
+The contract is in XML format and contains multiple XML files that define various aspects of a Word document. The files include settings, font table, styles, numbering, document structure, and theme. The document itself is not included in the provided files.
+
+Overall risk:
+The overall risk of the contract depends on the specific contents of the Word document and the context in which it is used. Since the document itself is not provided, it is not possible to assess the overall risk based on the given XML files alone.
+
+Risks:
+1. Payment clause risk (low):
+   Clause: <t w:val="3"/>
+   Category: payment
+   Explanation: This clause specifies the number of lines to be used for a paragraph in the document. It does not pose any significant risk as it only affects the formatting and does not involve any transfer of funds or obligations related to payment.
+   Recommendation: No improvement necessary.
+
+2. Termination clause risk (medium):
+   Clause: <r w:rsidR="00000001" w:rsid="00000002">
+    <t w:val="7"/><t w:val="1"/><t w:val="1"/><t w:val="11"/><t w:val="4"/><t w:val="1"/>
+   Category: termination
+   Explanation: This clause defines the sequence of tab stops in a table cell. While it does not pose an immediate risk, it may indicate a lack of standardization or consistency in the contract, which could potentially lead to confusion or misunderstandings in the future.
+   Recommendation: Consider standardizing the use of tab stops throughout the document to ensure clarity and consistency.
+
+3. Liability clause risk (high):
+   Clause: <w:r w:rsidR="00000001" w:rsid="00000004">
+    <w:t w:val="Liability"/><w:t w:val="Clause"/><w:t w:val=":"/><w:t w:val="5"/><w:t w:val="."/><w:t w:val="5"/><w:t w:val="m"/><w:t w:val=""/><w:t w:val="(A)"/><w:t w:val=""/><w:t w:val="(B)"/><w:t w:val=""/><w:t w:val="warrants"/><w:t w:val=""/><w:t w:val="that"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="Party"/><w:t w:val=""/><w:t w:val="of"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="Agreement"/><w:t w:val=""/><w:t w:val="shall"/><w:t w:val=""/><w:t w:val="be"/><w:t w:val=""/><w:t w:val="liable"/><w:t w:val=""/><w:t w:val="to"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="other"/><w:t w:val=""/><w:t w:val="Party"/><w:t w:val=""/><w:t w:val="for"/><w:t w:val=""/><w:t w:val="any"/><w:t w:val=""/><w:t w:val="claims"/><w:t w:val=""/><w:t w:val="arising"/><w:t w:val=""/><w:t w:val="from"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="performance"/><w:t w:val=""/><w:t w:val="or"/><w:t w:val=""/><w:t w:val="breach"/><w:t w:val=""/><w:t w:val="of"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="Agreement"/><w:t w:val=""/><w:t w:val="by"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="Party"/><w:t w:val=""/><w:t w:val="during"/><w:t w:val=""/><w:t w:val="the"/><w:t w:val=""/><w:t w:val="Term"/><w:t w:val=""/><w:t w:val="or"/><w:t w:val=""/><w:t w:val="Cancellation"/><w:t w:val=""/><w:t w:val="."/>
+   Category: liability
+   Explanation: This clause defines the liability of each party in the agreement for any claims arising from the performance or breach of the agreement. The specific terms of this clause will significantly impact the parties' rights and obligations and should be carefully reviewed to ensure fairness and clarity.
+   Recommendation: Carefully review the specific terms of this clause to ensure that they are fair and reasonable, and consider seeking legal advice if necessary.
+
+Recommendations:
+1. Standardize the use of tab stops throughout the document to ensure clarity and consistency.
+2. Carefully review the specific terms of the liability clause to ensure that they are fair and reasonable, and consider seeking legal advice if necessary.
+Error analyzing contract: Error: Failed to analyze contract - invalid response format
+    at analyzeContract (/home/runner/workspace/server/services/ai.ts:67:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MemStorage.analyzeContract (/home/runner/workspace/server/storage.ts:68:14)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:18:24)
+Error in analyzeContract: Error: Failed to analyze contract
+    at analyzeContract (/home/runner/workspace/server/services/ai.ts:71:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MemStorage.analyzeContract (/home/runner/workspace/server/storage.ts:68:14)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:18:24)
+Analysis error: Error: Failed to analyze contract
+    at analyzeContract (/home/runner/workspace/server/services/ai.ts:71:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async MemStorage.analyzeContract (/home/runner/workspace/server/storage.ts:68:14)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:18:24)
+6:34:15 AM [express] POST /api/contracts/analyze 500 in 261ms :: {"error":"Failed to analyze contrac…
