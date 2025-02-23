@@ -3,6 +3,12 @@ import { HfInference } from '@huggingface/inference';
 const hf = new HfInference(process.env.HF_ACCESS_TOKEN);
 
 export async function analyzeContract(content: string) {
+  // Roughly estimate tokens (4 chars per token on average)
+  const estimatedTokens = Math.ceil(content.length / 4);
+  if (estimatedTokens > 30000) {
+    throw new Error("Contract is too long. Please reduce the text length and try again.");
+  }
+
   const prompt = `You are a legal expert analyzing a contract. Analyze the following contract carefully and provide a detailed analysis.
 
 Contract text:
