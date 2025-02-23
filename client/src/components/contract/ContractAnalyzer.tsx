@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle, XCircle, Upload, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FileUploader } from "./FileUploader";
 
@@ -66,17 +66,44 @@ export function ContractAnalyzer() {
     },
   });
 
+  const handleAnalyze = () => {
+    if (!contractText.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide contract text to analyze",
+        variant: "destructive",
+      });
+      return;
+    }
+    analysisMutation.mutate(contractText);
+  };
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Contract Analysis</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Contract Analysis</h2>
+        <Button 
+          onClick={handleAnalyze}
+          disabled={analysisMutation.isPending || !contractText.trim()}
+        >
+          {analysisMutation.isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Analyzing...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              Analyze Contract
+            </>
+          )}
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
           <FileUploader 
-            onTextExtracted={text => {
-              setContractText(text);
-              analysisMutation.mutate(text);
-            }}
+            onTextExtracted={setContractText}
             isLoading={analysisMutation.isPending}
           />
 
@@ -114,12 +141,21 @@ export function ContractAnalyzer() {
                       <div key={index} className="p-4 bg-card rounded-lg border">
                         <div className="flex justify-between items-start mb-2">
                           <RiskBadge type={risk.type} />
-                          <span className="text-xs text-muted-foreground">{risk.category}</span>
+                          <span className="text-xs text-muted-foreground capitalize">{risk.category}</span>
                         </div>
                         <div className="space-y-2">
-                          <p className="text-sm font-medium">{risk.clause}</p>
-                          <p className="text-sm text-muted-foreground">{risk.explanation}</p>
-                          <p className="text-sm text-primary">{risk.recommendation}</p>
+                          <div className="text-sm font-medium">
+                            <h4 className="font-semibold mb-1">Clause:</h4>
+                            <p className="whitespace-pre-wrap">{risk.clause}</p>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            <h4 className="font-semibold mb-1">Risk Analysis:</h4>
+                            <p>{risk.explanation}</p>
+                          </div>
+                          <div className="text-sm text-primary">
+                            <h4 className="font-semibold mb-1">Suggestion:</h4>
+                            <p>{risk.recommendation}</p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -129,7 +165,7 @@ export function ContractAnalyzer() {
 
               <Card>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Recommendations</h3>
+                  <h3 className="font-semibold mb-2">General Recommendations</h3>
                   <ul className="list-disc list-inside space-y-2">
                     {analysisMutation.data.recommendations.map((rec, index) => (
                       <li key={index} className="text-sm text-muted-foreground">
@@ -143,7 +179,7 @@ export function ContractAnalyzer() {
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground">
               <AlertCircle className="mr-2 h-4 w-4" />
-              Upload a contract to see the analysis
+              {contractText ? 'Click "Analyze Contract" to see the analysis' : 'Upload a contract to begin analysis'}
             </div>
           )}
         </div>
