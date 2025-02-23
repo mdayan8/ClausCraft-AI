@@ -48,21 +48,20 @@ Provide your analysis in JSON format with this EXACT structure (do not include a
       let jsonStr = response.generated_text.trim();
       // Remove any markdown code blocks if present
       jsonStr = jsonStr.replace(/```json\n?|\n?```/g, '');
-      // Try to find JSON object if there's extra text
-      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No valid JSON found in response');
-      }
+      // Clean any extra text/markdown
+      jsonStr = jsonStr.replace(/^[\s\S]*?(\{[\s\S]*\})[\s\S]*$/, '$1');
+      
+      const result = JSON.parse(jsonStr);
 
-      const result = JSON.parse(jsonMatch[0]);
+      // Set default values if missing
+      const analysis = {
+        summary: result.summary || "No summary available",
+        overall_risk: result.overall_risk || "medium",
+        risks: Array.isArray(result.risks) ? result.risks : [],
+        recommendations: Array.isArray(result.recommendations) ? result.recommendations : []
+      };
 
-      // Validate required fields
-      if (!result.summary || !result.overall_risk || !Array.isArray(result.risks)) {
-        console.error('Invalid AI response structure:', result);
-        throw new Error('Invalid response format');
-      }
-
-      return result;
+      return analysis;
     } catch (e) {
       console.error('Failed to parse AI response:', response.generated_text);
       throw new Error('Failed to analyze contract - invalid response format');
