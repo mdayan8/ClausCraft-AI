@@ -18,7 +18,7 @@ export async function analyzeContract(content: string) {
 Contract text:
 ${content}
 
-Format your response EXACTLY as this JSON structure:
+Return ONLY a JSON response with EXACTLY this structure (without any additional text before or after):
 {
   "summary": "Brief overview of the contract and overall assessment",
   "overall_risk": "high|medium|low",
@@ -48,10 +48,13 @@ Format your response EXACTLY as this JSON structure:
     });
 
     try {
-      const result = JSON.parse(response.generated_text);
+      // Clean the response text to ensure it only contains the JSON part
+      const jsonStr = response.generated_text.trim().replace(/```json|```/g, '');
+      const result = JSON.parse(jsonStr);
 
       // Validate the response structure
       if (!result.summary || !result.overall_risk || !Array.isArray(result.risks)) {
+        console.error('Invalid AI response structure:', result);
         throw new Error('Invalid response format from AI');
       }
 
@@ -67,21 +70,20 @@ Format your response EXACTLY as this JSON structure:
 }
 
 export async function generateContract(type: string, params: any) {
-  const prompt = `You are a legal expert generating a ${type} contract. Please create a contract using these parameters:
+  const prompt = `You are a legal expert generating a ${type} contract. Generate a clear, professional contract using these parameters:
 ${JSON.stringify(params, null, 2)}
 
-Generate a well-structured, legally-sound contract that includes:
+Create a contract that includes:
 1. Title and introduction
-2. Definitions of key terms
-3. Scope of services/agreement
-4. Payment terms (if applicable)
-5. Duration and termination
-6. Responsibilities of each party
+2. Definitions
+3. Scope of agreement
+4. Terms and conditions
+5. Payment terms (if applicable)
+6. Duration and termination
 7. Confidentiality
 8. Governing law
-9. Signatures
 
-Format the contract in a clear, professional structure. Return ONLY a JSON response with this format:
+Return ONLY a JSON response with this exact structure (no other text):
 {
   "content": "The complete contract text"
 }`;
@@ -97,9 +99,15 @@ Format the contract in a clear, professional structure. Return ONLY a JSON respo
       },
     });
 
-    // Ensure we get valid JSON
     try {
-      const result = JSON.parse(response.generated_text);
+      // Clean the response text
+      const jsonStr = response.generated_text.trim().replace(/```json|```/g, '');
+      const result = JSON.parse(jsonStr);
+
+      if (!result.content) {
+        throw new Error('Invalid contract format');
+      }
+
       return {
         content: result.content,
         format: 'text'
@@ -136,7 +144,7 @@ Format your response to be clear and easy to read, using proper paragraphs and b
       },
     });
 
-    return response.generated_text;
+    return response.generated_text.trim();
   } catch (error) {
     console.error('Error getting legal response:', error);
     throw new Error('Failed to get legal response');

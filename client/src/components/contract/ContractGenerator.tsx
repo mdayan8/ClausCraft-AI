@@ -6,10 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const formSchema = z.object({
+  type: z.string().min(1, "Please select a contract type"),
+  partyA: z.string().min(1, "Party A name is required"),
+  partyB: z.string().min(1, "Party B name is required"),
+  terms: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 const contractTypes = [
   { id: "nda", label: "Non-Disclosure Agreement" },
@@ -18,16 +29,12 @@ const contractTypes = [
   { id: "lease", label: "Lease Agreement" }
 ];
 
-interface ContractFormData {
-  type: string;
-  partyA: string;
-  partyB: string;
-  terms: string;
-}
-
 export function ContractGenerator() {
   const { toast } = useToast();
-  const form = useForm<ContractFormData>({
+  const [generatedContract, setGeneratedContract] = useState<string>("");
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       type: "",
       partyA: "",
@@ -37,11 +44,19 @@ export function ContractGenerator() {
   });
 
   const generateMutation = useMutation({
-    mutationFn: async (data: ContractFormData) => {
+    mutationFn: async (data: FormData) => {
       const res = await apiRequest("POST", "/api/contracts/generate", data);
-      return res.json();
+      const result = await res.json();
+      return result;
+    },
+    onMutate: () => {
+      toast({
+        title: "Generating Contract",
+        description: "Please wait while we generate your contract...",
+      });
     },
     onSuccess: (data) => {
+      setGeneratedContract(data.content);
       toast({
         title: "Contract Generated",
         description: "Your contract has been generated successfully."
@@ -56,14 +71,14 @@ export function ContractGenerator() {
     }
   });
 
-  const onSubmit = (data: ContractFormData) => {
+  const onSubmit = (data: FormData) => {
     generateMutation.mutate(data);
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Contract Generator</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardContent className="p-4">
@@ -89,6 +104,7 @@ export function ContractGenerator() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -102,6 +118,7 @@ export function ContractGenerator() {
                       <FormControl>
                         <Input placeholder="Enter name" {...field} />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -115,6 +132,7 @@ export function ContractGenerator() {
                       <FormControl>
                         <Input placeholder="Enter name" {...field} />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -132,6 +150,7 @@ export function ContractGenerator() {
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -160,10 +179,10 @@ export function ContractGenerator() {
 
         <Card>
           <CardContent className="p-4">
-            {generateMutation.data ? (
+            {generatedContract ? (
               <div className="prose max-w-none">
-                <pre className="whitespace-pre-wrap">
-                  {generateMutation.data.content}
+                <pre className="whitespace-pre-wrap text-sm">
+                  {generatedContract}
                 </pre>
               </div>
             ) : (
