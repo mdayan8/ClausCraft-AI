@@ -9,16 +9,19 @@ export default function AuthPage() {
   const { user, registerMutation } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      // Auto-register with default credentials
+    if (user) {
+      setLocation("/dashboard");
+    }
+  }, [user, setLocation]);
+
+  useEffect(() => {
+    if (!user && !registerMutation.isPending && !registerMutation.isSuccess) {
       registerMutation.mutate({ 
         email: "user@example.com", 
         password: "password123" 
       });
-    } else {
-      setLocation("/dashboard");
     }
-  }, [user, setLocation, registerMutation]);
+  }, [user, registerMutation.isPending, registerMutation.isSuccess]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
