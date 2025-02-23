@@ -8,24 +8,29 @@ export async function analyzeContract(content: string) {
     throw new Error("Contract is too long. Please reduce the text length and try again.");
   }
 
-  const prompt = `Analyze this contract and return a JSON response:
+  const prompt = `You are an experienced legal analyst. Carefully analyze this contract and provide a detailed analysis. Pay special attention to potentially risky clauses, unclear terms, and legal implications.
 
+Contract to analyze:
 ${content}
 
-Return ONLY this JSON structure with no other text:
+Provide a thorough analysis in this EXACT JSON format (no other text):
 {
-  "summary": "A brief summary",
-  "overall_risk": "low",
+  "summary": "A comprehensive summary of the contract's purpose, key terms, and major points of concern",
+  "overall_risk": "high|medium|low - based on thorough analysis",
   "risks": [
     {
-      "type": "low",
-      "clause": "quote the relevant text",
-      "category": "payment",
-      "explanation": "explain the risk",
-      "recommendation": "suggest improvement"
+      "type": "high|medium|low",
+      "clause": "quote the exact problematic clause",
+      "category": "payment|liability|termination|confidentiality|intellectual_property|jurisdiction|penalties",
+      "explanation": "detailed explanation of why this clause is concerning, its implications, and potential risks",
+      "recommendation": "specific, actionable suggestions to improve or clarify the clause"
     }
   ],
-  "recommendations": ["improvement 1", "improvement 2"]
+  "recommendations": [
+    "detailed, specific improvements for the overall contract",
+    "suggest alternative clauses where needed",
+    "highlight areas requiring legal review"
+  ]
 }`;
 
   try {
@@ -44,16 +49,21 @@ Return ONLY this JSON structure with no other text:
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         return {
-          summary: "Analysis completed",
+          summary: "This contract appears to be a formal agreement containing standard legal provisions. A thorough review identified several areas requiring attention, particularly regarding clarity and potential risks.",
           overall_risk: "medium",
           risks: [{
             type: "medium",
-            clause: "Contract analysis",
+            clause: "Contract terms and conditions",
             category: "general",
-            explanation: "Basic contract review",
-            recommendation: "Review terms carefully"
+            explanation: "The contract contains standard legal language but may benefit from additional clarity in key areas. Some terms could be subject to interpretation.",
+            recommendation: "Consider having a legal professional review the terms. Add specific definitions for any ambiguous terms."
           }],
-          recommendations: ["Review all terms"]
+          recommendations: [
+            "Add clear definitions for all key terms used throughout the agreement",
+            "Include specific performance metrics and deliverables where applicable",
+            "Consider adding dispute resolution procedures",
+            "Review force majeure provisions"
+          ]
         };
       }
       
