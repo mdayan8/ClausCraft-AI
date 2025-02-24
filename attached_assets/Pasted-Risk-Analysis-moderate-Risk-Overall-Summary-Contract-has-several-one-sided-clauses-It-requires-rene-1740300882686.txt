@@ -1,0 +1,84 @@
+Risk Analysis
+moderate Risk
+Overall Summary
+Contract has several one-sided clauses. It requires renegotiation to ensure fair protection for both parties. Key issues include...
+
+Scope of Work
+low Risk
+Party A agrees to provide IT consultancy and infrastructure development services to Party B, specifically involving cloud migration, cybersecurity enhancements, and system optimization.
+
+Risk Analysis: This clause is straightforward and standard. It clearly outlines the services to be provided.
+
+Suggestion: N/A
+
+Term and Termination
+low Risk
+This agreement shall commence on 1st March 2025 and shall continue until 31st December 2025 unless terminated earlier by mutual written consent or breach of terms. Termination without cause requires 30 days’ prior written notice. Termination for cause, including breach of any clause, can be immediate.
+
+Risk Analysis: This clause is fair and provides reasonable notice periods for termination.
+
+Suggestion: N/A
+
+Payment Terms
+low Risk
+Party B shall pay Party A the total amount of INR 25,00,000 within 30 days of invoice receipt. Late payments will incur a penalty of 5% per month on the outstanding balance.
+
+Risk Analysis: This clause is standard and fair, but it lacks a specific date for payment.
+
+Suggestion: Modify to include: 'Payment is due on the 15th of the month following invoice receipt.'
+
+High-Risk Liability Clause
+high Risk
+Party B acknowledges and accepts full responsibility for any loss, damage, or legal action arising from misuse, non-compliance, or negligence associated with the delivered services/products. Party A shall not be held liable beyond the value of the contract, regardless of circumstances.
+
+Risk Analysis: This clause is heavily one-sided and places all liability on Party B. It should be renegotiated to share liability.
+
+Suggestion: Modify to include: 'Both parties accept shared responsibility for any loss, damage, or legal action arising from misuse, non-compliance, or negligence associated with the delivered services/products.'
+
+Confidentiality and Non-Disclosure
+moderate Risk
+Both parties agree to maintain the confidentiality of all proprietary information exchanged during this agreement. Breach of this clause will result in immediate legal action and a penalty of INR 10,00,000 payable within 7 days.
+
+Risk Analysis: This clause is standard and fair, but the penalty amount should be reduced to a reasonable level.
+
+Suggestion: Modify to include: 'Breach of this clause will result in immediate legal action and a penalty of INR 1,00,000 payable within 7 days.'
+
+Indemnification Clause
+low Risk
+Party B agrees to indemnify and hold harmless Party A from any claims, liabilities, damages, or legal fees arising from third-party actions or breaches of this agreement.
+
+Risk Analysis: This clause is standard and fair.
+
+Suggestion: N/A
+
+Breach and Penalties
+high Risk
+In the event of any breach of this contract by either party: The non-breaching party reserves the right to seek compensation amounting to INR 15,00,000 and terminate the agreement without notice. The breaching party shall bear all legal and litigation costs.
+
+Risk Analysis: This clause is heavily one-sided and places all penalties on the breaching party.
+
+Suggestion: Modify to include: 'In the event of any breach of this contract by either party: Both parties agree to negotiate compensation and notice periods in good faith. The breaching party shall bear all legal and litigation costs.'
+
+Dispute Resolution
+low Risk
+Any dispute arising out of or relating to this agreement shall be resolved through arbitration in Bengaluru, and the decision of the arbitrator shall be binding. Legal action shall be pursued only if arbitration fails.
+
+Risk Analysis: This clause is standard and fair.
+
+Suggestion: N/A
+
+Jurisdiction
+low Risk
+This agreement shall be governed by the laws of India. Any legal proceedings shall be filed exclusively in the courts of Bengaluru.
+
+Risk Analysis: This clause is standard and fair.
+
+Suggestion: N/A
+
+Entire Agreement
+low Risk
+This document constitutes the entire agreement between the parties and supersedes any prior agreements or understandings. Amendments must be in writing and signed by both parties.
+
+Risk Analysis: This clause is standard and fair.
+
+Suggestion: N/A

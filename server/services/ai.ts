@@ -8,50 +8,42 @@ export async function analyzeContract(content: string) {
     throw new Error("Contract is too long. Please reduce the text length and try again.");
   }
 
-  const prompt = `You are an expert legal analyst. Analyze this contract and provide a detailed risk assessment with the following structure:
+  const prompt = `
+You are a legal contract analysis expert. Analyze this contract carefully and provide detailed, specific feedback.
+Respond in JSON format only.
 
-Contract to analyze:
+Contract text:
 ${content}
 
-Return ONLY a JSON response in this exact format:
+Example response format:
 {
-  "risk_level": "high|medium|low",
-  "summary": "Overall summary of the contract's key points and major concerns",
+  "riskLevel": "high",
   "clauses": [
     {
-      "title": "Clause title/topic",
-      "risk_level": "high|medium|low",
-      "content": "The exact clause text from contract",
-      "analysis": "Detailed explanation of risks and implications",
-      "suggestion": "Specific recommendations to improve the clause"
+      "category": "Termination",
+      "content": "Company may terminate employment at any time without notice",
+      "risk": "This clause is heavily one-sided and provides no protection for the employee. It lacks proper notice period and due process.",
+      "riskLevel": "high",
+      "suggestion": "Modify to include: 'Either party may terminate employment with 30 days written notice. Immediate termination only for documented cause with proper due process.'"
     }
   ],
-  "recommendations": [
-    "List of specific improvements",
-    "Alternative clauses where needed",
-    "Areas requiring legal review"
-  ]
-}`;
+  "summary": "Contract needs significant revision to ensure fair protection for both parties. Key issues include..."
+}
 
-Provide a thorough analysis in this EXACT JSON format (no other text):
-{
-  "summary": "A comprehensive summary of the contract's purpose, key terms, and major points of concern",
-  "overall_risk": "high|medium|low - based on thorough analysis",
-  "risks": [
-    {
-      "type": "high|medium|low",
-      "clause": "quote the exact problematic clause",
-      "category": "payment|liability|termination|confidentiality|intellectual_property|jurisdiction|penalties",
-      "explanation": "detailed explanation of why this clause is concerning, its implications, and potential risks",
-      "recommendation": "specific, actionable suggestions to improve or clarify the clause"
-    }
-  ],
-  "recommendations": [
-    "detailed, specific improvements for the overall contract",
-    "suggest alternative clauses where needed",
-    "highlight areas requiring legal review"
-  ]
-}`;
+Instructions:
+1. Break down the contract into logical clauses.
+2. For each clause:
+   - Identify its category (Termination, Compensation, Non-compete, etc.).
+   - Assess risk level based on fairness and legal standards.
+   - Provide specific, actionable suggestions for improvement.
+3. Focus on:
+   - One-sided terms.
+   - Vague or ambiguous language.
+   - Missing standard protections.
+   - Unusual or potentially unfair conditions.
+4. Give practical, human-like suggestions for improvements.
+
+Return ONLY valid JSON matching the example format above.`;
 
   try {
     const response = await hf.textGeneration({
@@ -64,54 +56,50 @@ Provide a thorough analysis in this EXACT JSON format (no other text):
       },
     });
 
-    try {
-      // Clean and parse the response
-      const text = response.generated_text.trim();
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        // Fallback response format
-        return {
-          risk_level: "medium",
-          summary: "Contract requires review. Some terms may need clarification.",
-          clauses: [{
-            title: "General Terms",
-            risk_level: "medium",
-            content: "Overall contract terms",
-            analysis: "Standard legal language present but some terms require clarification",
-            suggestion: "Review with legal counsel and add specific definitions"
-          }],
-          recommendations: [
-            "Add clear definitions for key terms",
-            "Include specific deliverables",
-            "Add dispute resolution procedures"
-          ]
-        };
-      }
-      
-      const result = JSON.parse(jsonMatch[0]);
-      return {
-        summary: result.summary || "Analysis completed",
-        overall_risk: result.overall_risk || "medium",
-        risks: result.risks || [],
-        recommendations: result.recommendations || []
-      };
-    } catch (e) {
-      return {
-        summary: "Analysis completed",
-        overall_risk: "medium",
-        risks: [{
-          type: "medium",
-          clause: "Contract terms",
-          category: "general", 
-          explanation: "Standard review",
-          recommendation: "Review carefully"
-        }],
-        recommendations: ["Review all terms"]
-      };
+    const analysisText = response.generated_text?.trim() || "";
+
+    // Clean up the response to ensure valid JSON
+    let cleanedAnalysisText = analysisText.replace(/```json|```/g, '').trim();
+    if (!cleanedAnalysisText.endsWith('}')) {
+      cleanedAnalysisText += '}';
     }
-  } catch (error) {
-    console.error('Error analyzing contract:', error);
-    throw new Error('Failed to analyze contract');
+
+    // Parse and validate the JSON response
+    let analysis;
+    try {
+      analysis = JSON.parse(cleanedAnalysisText);
+    } catch (error) {
+      console.error("Failed to parse AI response:", error);
+      throw new Error("Failed to parse contract analysis");
+    }
+
+    // Validate and normalize the response
+    return {
+      riskLevel: analysis.riskLevel?.toLowerCase() || "medium",
+      clauses: (analysis.clauses || []).map((clause: any) => ({
+        category: clause.category || "Uncategorized",
+        content: clause.content || "Content not specified",
+        risk: clause.risk || "Risk not specified",
+        riskLevel: clause.riskLevel?.toLowerCase() || "medium",
+        suggestion: clause.suggestion || "No specific suggestions provided"
+      })),
+      summary: analysis.summary || "Contract analysis completed"
+    };
+
+  } catch (error: any) {
+    console.error("Contract analysis error:", error);
+    // Provide a more specific fallback analysis
+    return {
+      riskLevel: "medium",
+      clauses: [{
+        category: "General Contract Terms",
+        content: content.slice(0, 200) + "...",
+        risk: "Unable to complete full analysis. Common risks in similar contracts include unclear terms, one-sided provisions, and missing standard protections.",
+        riskLevel: "medium",
+        suggestion: "Consider having a legal professional review the contract. Focus on clearly defining terms, ensuring mutual protections, and including standard clauses for your industry."
+      }],
+      summary: "The contract requires careful review. While automated analysis encountered issues, it's recommended to ensure all terms are clearly defined, mutually beneficial, and legally sound."
+    };
   }
 }
 
@@ -143,25 +131,20 @@ Return ONLY valid JSON in this format:
       },
     });
 
-    try {
-      // Clean and parse response
-      let jsonStr = response.generated_text.trim();
-      jsonStr = jsonStr.replace(/```json\n?|\n?```/g, '');
-      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No valid JSON found in response');
-      }
-
-      const result = JSON.parse(jsonMatch[0]);
-      if (!result.content) {
-        throw new Error('Invalid contract format');
-      }
-
-      return result;
-    } catch (e) {
-      console.error('Failed to parse AI response:', response.generated_text);
-      throw new Error('Failed to generate contract - invalid format');
+    // Clean and parse response
+    let jsonStr = response.generated_text.trim();
+    jsonStr = jsonStr.replace(/```json\n?|\n?```/g, '');
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No valid JSON found in response');
     }
+
+    const result = JSON.parse(jsonMatch[0]);
+    if (!result.content) {
+      throw new Error('Invalid contract format');
+    }
+
+    return result;
   } catch (error) {
     console.error('Error generating contract:', error);
     throw new Error('Failed to generate contract');

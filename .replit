@@ -28,7 +28,7 @@ args = "Start application"
 
 [[workflows.workflow]]
 name = "Start application"
-author = "agent"
+author = ""
 
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false

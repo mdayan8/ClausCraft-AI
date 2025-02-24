@@ -1,0 +1,171 @@
+import type { Express } from "express";
+import { createServer } from "http";
+import { storage } from "./storage";
+import { insertContractSchema } from "@shared/schema";
+
+async function analyzeContract(text: string) {
+  const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1";
+
+  // Truncate text if too long and split into manageable chunks
+  const maxLength = 4000;
+  const truncatedText = text.length > maxLength ? text.slice(0, maxLength) + "..." : text;
+
+  const prompt = `
+You are a legal contract analysis expert. Analyze this contract carefully and provide detailed, specific feedback.
+Respond in JSON format only.
+
+Contract text:
+${truncatedText}
+
+Example response format:
+{
+  "riskLevel": "high",
+  "clauses": [
+    {
+      "category": "Termination",
+      "content": "Company may terminate employment at any time without notice",
+      "risk": "This clause is heavily one-sided and provides no protection for the employee. It lacks proper notice period and due process.",
+      "riskLevel": "high",
+      "suggestion": "Modify to include: 'Either party may terminate employment with 30 days written notice. Immediate termination only for documented cause with proper due process.'"
+    }
+  ],
+  "summary": "Contract needs significant revision to ensure fair protection for both parties. Key issues include..."
+}
+
+Instructions:
+1. Break down the contract into logical clauses
+2. For each clause:
+   - Identify its category (Termination, Compensation, Non-compete, etc.)
+   - Assess risk level based on fairness and legal standards
+   - Provide specific, actionable suggestions for improvement
+3. Focus on:
+   - One-sided terms
+   - Vague or ambiguous language
+   - Missing standard protections
+   - Unusual or potentially unfair conditions
+4. Give practical, human-like suggestions for improvements
+
+Return ONLY valid JSON matching the example format above.`;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.HUGGING_FACE_TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 2000,
+          temperature: 0.7,
+          return_full_text: false,
+          top_k: 50,
+          top_p: 0.9
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    let analysisText = result.generated_text || result[0]?.generated_text;
+
+    // Clean up the response to ensure valid JSON
+    analysisText = analysisText.replace(/```json|```/g, '').trim();
+    if (!analysisText.endsWith('}')) {
+      analysisText += '}';
+    }
+
+    // Parse and validate the JSON response
+    let analysis;
+    try {
+      analysis = JSON.parse(analysisText);
+    } catch (error) {
+      console.error("Failed to parse AI response:", error);
+      throw new Error("Failed to parse contract analysis");
+    }
+
+    // Validate and normalize the response
+    return {
+      riskLevel: analysis.riskLevel?.toLowerCase() || "medium",
+      clauses: (analysis.clauses || []).map((clause: any) => ({
+        category: clause.category || "Uncategorized",
+        content: clause.content || "Content not specified",
+        risk: clause.risk || "Risk not specified",
+        riskLevel: clause.riskLevel?.toLowerCase() || "medium",
+        suggestion: clause.suggestion || "No specific suggestions provided"
+      })),
+      summary: analysis.summary || "Contract analysis completed"
+    };
+
+  } catch (error: any) {
+    console.error("Contract analysis error:", error);
+    // Provide a more specific fallback analysis
+    return {
+      riskLevel: "medium",
+      clauses: [{
+        category: "General Contract Terms",
+        content: truncatedText.slice(0, 200) + "...",
+        risk: "Unable to complete full analysis. Common risks in similar contracts include unclear terms, one-sided provisions, and missing standard protections.",
+        riskLevel: "medium",
+        suggestion: "Consider having a legal professional review the contract. Focus on clearly defining terms, ensuring mutual protections, and including standard clauses for your industry."
+      }],
+      summary: "The contract requires careful review. While automated analysis encountered issues, it's recommended to ensure all terms are clearly defined, mutually beneficial, and legally sound."
+    };
+  }
+}
+
+export async function registerRoutes(app: Express) {
+  app.post("/api/contracts", async (req, res) => {
+    try {
+      const contractData = insertContractSchema.parse(req.body);
+
+      // Create initial contract entry
+      const contract = await storage.createContract(contractData);
+
+      try {
+        // Analyze the contract
+        const analysis = await analyzeContract(contractData.content);
+
+        // Update with analysis results
+        const updatedContract = await storage.updateContractAnalysis(
+          contract.id,
+          analysis,
+          analysis.riskLevel
+        );
+
+        res.json(updatedContract);
+      } catch (analysisError) {
+        // If analysis fails, return the contract without analysis
+        console.error("Analysis failed:", analysisError);
+        res.json(contract);
+      }
+    } catch (error) {
+      console.error("Contract processing error:", error);
+      res.status(400).json({ 
+        error: "Failed to process contract",
+        message: error.message 
+      });
+    }
+  });
+
+  app.get("/api/contracts", async (req, res) => {
+    const contracts = await storage.getContracts();
+    res.json(contracts);
+  });
+
+  app.get("/api/contracts/:id", async (req, res) => {
+    const contract = await storage.getContract(parseInt(req.params.id));
+    if (!contract) {
+      res.status(404).json({ error: "Contract not found" });
+      return;
+    }
+    res.json(contract);
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
